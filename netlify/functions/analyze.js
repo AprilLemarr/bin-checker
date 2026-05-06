@@ -2,8 +2,9 @@ export default async (req, context) => {
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }
-
-  const apiKey = context.env.ANTHROPIC_API_KEY;
+ 
+  // Get API key from process.env (correct way for Netlify Functions)
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   
   if (!apiKey) {
     return new Response(
@@ -11,7 +12,7 @@ export default async (req, context) => {
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-
+ 
   try {
     const body = await req.json();
     
@@ -23,16 +24,16 @@ export default async (req, context) => {
       },
       body: JSON.stringify(body)
     });
-
+ 
     const data = await response.json();
-
+ 
     if (!response.ok) {
       return new Response(
         JSON.stringify({ error: data.error?.message || 'API error' }),
         { status: response.status, headers: { 'Content-Type': 'application/json' } }
       );
     }
-
+ 
     return new Response(
       JSON.stringify(data),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
